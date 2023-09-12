@@ -27,7 +27,6 @@ jobs:
 
           # Make a GET request to the API to get the release information
           response=$(curl -s $external_repo_api_url)
-          echo response
 
           # Extract the tag name from the response
           tag_name=$(echo "$response" | jq -r .tag_name)
