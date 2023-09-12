@@ -59,22 +59,20 @@ jobs:
           
           if [ "$previous_release" != "$latest_release" ]; then
             echo "New release detected: $latest_release"
-            echo "is_new_release=true" >> "$GITHUB_ENV" # Set the output to true if new release detected
             echo "$latest_release" > previous_release.txt
           else
             echo "No new release detected. Exiting..."
-            echo "is_new_release=false" >> "$GITHUB_ENV"  # Set the output to false if no new release detected
+            stopMarker=$(uuidgen)
+            echo "::stop-commands::$stopMarker"
             exit 0
           fi
           
       - name: Install 7z tool
-        if: $is_new_release == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y p7zip-full  # 安装7z命令行工具
         
       - name: Download and extract 7z file
-        if: $is_new_release == 'true'
         run: |
           # Get the filtered asset URLs from the previous step
           filtered_assets=(${{ steps.get_assets.outputs.filtered_assets }})
@@ -95,20 +93,17 @@ jobs:
           done
       
       - name: Set up Node.js
-        if: $is_new_release == 'true'
         uses: actions/setup-node@v2
         with:
           node-version: '16' # 使用你需要的 Node.js 版本
 
       - name: Install nodejs dependencies
-        if: $is_new_release == 'true'
         run: |
           npm install -g asar  # 安装 asar 工具
           npm install -g npm    # 升级 npm 到最新版本
           npm install -g @softprops/action-gh-release # 安装发布 release 的 GitHub Actions 操作
           
       - name: Find and Replace in renderer.js
-        if: $is_new_release == 'true'
         run: |
           # Find the app.asar file in the /resources directory
           asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
@@ -129,14 +124,12 @@ jobs:
           fi
           
       - name: Repack asar
-        if: $is_new_release == 'true'
         run: |
           npm exec asar pack "$asar_path.extracted" "$asar_path"
           echo "Repacked app.asar"
           
       - name: Extract Version from Tag Name
         id: extract_version
-        if: $is_new_release == 'true'
         run: |
           # Get the tag_name from the previous step
           tag_name=$tag
@@ -149,7 +142,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Repack asar
-        if: $is_new_release == 'true'
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
@@ -159,7 +151,6 @@ jobs:
           echo "Created 7z archive"
 
       - name: Create Temporary Tag
-        if: $is_new_release == 'true'
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
@@ -169,7 +160,6 @@ jobs:
           echo "Created temporary tag v$version"
 
       - name: Publish Release with Binary Attachment
-        if: $is_new_release == 'true'
         uses: softprops/action-gh-release@v1
         with:
           files: |
