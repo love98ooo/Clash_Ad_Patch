@@ -1,0 +1,196 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push: 
+    branches: [ main ]
+  schedule:
+    - cron: '0 16 * * *'
+
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install python dependencies
+        run: pip install requests
+
+      - name: Trigger workflow on external repository release
+        run: |
+          # Replace with the URL of the external repository's release API
+          external_repo_api_url="https://api.github.com/repos/Fndroid/clash_for_windows_pkg/releases/latest"
+
+          # Make a GET request to the API to get the release information
+          response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" $external_repo_api_url)
+
+          # Extract the tag name from the response
+          tag_name=$(echo "$response" | jq -r .tag_name)
+
+          # Parse the JSON response to extract asset URLs
+          asset_urls=($(echo "$response" | jq -r '.[].assets[].browser_download_url'))
+
+          # Filter asset URLs to exclude "arm64" and "ia32"
+          filtered_assets=()
+          for url in "${asset_urls[@]}"; do
+            if ! echo "$url" | grep -E "(arm64|ia32)"; then
+              filtered_assets+=("$url")
+            fi
+          done
+          
+          echo "Triggered workflow for external release $tag_name"
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Compare with previous release
+        id: compare_release
+        run: |
+          # Get the previous release tag name from a file (if available)
+          previous_release=$(cat previous_release.txt || echo "")
+
+          # Get the latest release tag name
+          latest_release=${{ steps.external_release.outputs.tag_name }}
+
+          if [ "$previous_release" != "$latest_release" ]; then
+            echo "New release detected: $latest_release"
+            echo "$latest_release" > previous_release.txt
+          else
+            echo "No new release detected. Exiting..."
+            exit 0
+          fi
+          
+      - name: Install 7z tool
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full  # 安装7z命令行工具
+        
+      - name: Download and extract 7z file
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          # Get the filtered asset URLs from the previous step
+          filtered_assets=(${{ steps.get_assets.outputs.filtered_assets }})
+
+          for url in "${filtered_assets[@]}"; do
+            filename=$(basename "$url")
+            echo "Downloading $filename"
+            curl -L -o "$filename" "$url"
+            
+            # Check if the downloaded file is a 7z archive
+            if [[ "$filename" == *.7z ]]; then
+              # Extract the 7z file
+              7z x "$filename"
+              echo "Extracted $filename"
+            else
+              echo "$filename is not a 7z archive. Skipping extraction."
+            fi
+          done
+      
+      - name: Set up Node.js
+        if: steps.compare_release.outputs.new_release == 'true'
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18' # 使用你需要的 Node.js 版本
+
+      - name: Install nodejs dependencies
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          npm install -g asar  # 安装 asar 工具
+          npm install -g npm    # 升级 npm 到最新版本
+          npm install -g @softprops/action-gh-release # 安装发布 release 的 GitHub Actions 操作
+          
+      - name: Find and Replace in renderer.js
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          # Find the app.asar file in the /resources directory
+          asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
+
+          if [ -n "$asar_path" ]; then
+            echo "Found app.asar at: $asar_path"
+            # Decompress app.asar using npm
+            npm exec asar extract "$asar_path" "$asar_path.extracted"
+            echo "Decompressed app.asar"
+
+            # Perform the replacement in renderer.js
+            replacement_command="s|\\[t(\"div\",{staticClass:\"title\"},\\[e._v(\"Advertisement\")\\]),e._v(\" \"),t(\"div\",{staticClass:\"ad-img-list\"},e._l(e.adImages,(function(i,n){return t(\"div\",{key:n,staticClass:\"ad-img\"},\\[t(\"lazy-image-view\",{attrs:{clickalbe:i.click,src:i.img},on:{click:function(t){return e.adClick(n)}}})\\],1)})),0)\\]|\\[t(\"div\",{staticClass:\"title\"},\\[e._v(\"\")\\]),e._v(\" \"),t(\"div\",{staticClass:\"ad-img-list\"},e._l(e.adImages,(function(i,n){return t(\"div\",{key:null,staticClass:\"ad-img\"},\\[t(\"lazy-image-view\",{attrs:{clickalbe:i.click,src:null},on:{click:function(t){return e.adClick(n)}}})\\],1)})),0)\\]|g"
+            sed -i "$replacement_command" "$asar_path.extracted/dist/electron/renderer.js"
+            echo "Replaced content in renderer.js"
+          else
+            echo "app.asar file not found in /resources directory."
+            exit 1
+          fi
+          
+      - name: Repack asar
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          npm exec asar pack "$asar_path.extracted" "$asar_path"
+          echo "Repacked app.asar"
+          
+      - name: Extract Version from Tag Name
+        id: extract_version
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          # Get the tag_name from the previous step
+          tag_name=${{ steps.external_release.outputs.tag_name }}
+
+          # Extract the version number (remove "v " if present)
+          version=${tag_name#"v "}
+
+          echo "::set-output name=version::$version"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Repack asar
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          # Extract the version number from the previous step
+          version=${{ steps.extract_version.outputs.version }}
+
+          # Create a 7z archive with a specific name and include app.asar
+          7z a "Clash.for.Windows-$version-win_app.7z" path/to/original/app.asar
+          echo "Created 7z archive"
+
+      - name: Create Temporary Tag
+        if: steps.compare_release.outputs.new_release == 'true'
+        run: |
+          # Extract the version number from the previous step
+          version=${{ steps.extract_version.outputs.version }}
+
+          # Create a temporary tag (only local)
+          git tag -a "v$version" -m "Version $version"
+          echo "Created temporary tag v$version"
+
+      - name: Publish Release with Binary Attachment
+        if: steps.compare_release.outputs.new_release == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Clash.for.Windows-$version-win_app.7z  # 指定要上传的二进制附件文件
+          title: Clash for Windows v$version Ad Patch
+          body: |
+            ⚠️ For learning purposes only. If there is any infringement, please send me a private message to delete
+
+            How to use it:
+            - Quit your Clash first
+            - Download Clash.for.Windows-$version-win_app.7z
+            - Unzip Clash.for.Windows-$version-win.7z
+            - Replace Clash for Clash\resources\app.asar with the new app.asar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
