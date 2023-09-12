@@ -100,7 +100,7 @@ jobs:
         if: steps.compare_release.outputs.new_release == 'true'
         uses: actions/setup-node@v2
         with:
-          node-version: '18' # 使用你需要的 Node.js 版本
+          node-version: '16' # 使用你需要的 Node.js 版本
 
       - name: Install nodejs dependencies
         if: steps.compare_release.outputs.new_release == 'true'
