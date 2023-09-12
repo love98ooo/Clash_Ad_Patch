@@ -43,6 +43,8 @@ jobs:
               filtered_assets+=("$url")
             fi
           done
+
+          echo "filtered_asset=$filtered_assets[0]" >> "$GITHUB_ENV"
           
           echo "Triggered workflow for external release $tag_name"
           
@@ -75,22 +77,19 @@ jobs:
       - name: Download and extract 7z file
         run: |
           # Get the filtered asset URLs from the previous step
-          filtered_assets=(${{ steps.get_assets.outputs.filtered_assets }})
-
-          for url in "${filtered_assets[@]}"; do
-            filename=$(basename "$url")
-            echo "Downloading $filename"
-            curl -L -o "$filename" "$url"
+          url=$filtered_asset
+          filename=$(basename "$url")
+          echo "Downloading $filename"
+          curl -L -o "$filename" "$url"
             
-            # Check if the downloaded file is a 7z archive
-            if [[ "$filename" == *.7z ]]; then
-              # Extract the 7z file
-              7z x "$filename"
-              echo "Extracted $filename"
-            else
-              echo "$filename is not a 7z archive. Skipping extraction."
-            fi
-          done
+          # Check if the downloaded file is a 7z archive
+          if [[ "$filename" == *.7z ]]; then
+            # Extract the 7z file
+            7z x "$filename"
+            echo "Extracted $filename"
+          else
+            echo "$filename is not a 7z archive. Skipping extraction."
+          fi
       
       - name: Set up Node.js
         uses: actions/setup-node@v2
