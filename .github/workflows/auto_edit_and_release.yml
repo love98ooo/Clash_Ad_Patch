@@ -105,7 +105,9 @@ jobs:
       - name: Find and Replace in renderer.js
         run: |
           # Find the app.asar file in the /resources directory
+          ls
           asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
+          
 
           if [ -n "$asar_path" ]; then
             echo "Found app.asar at: $asar_path"
