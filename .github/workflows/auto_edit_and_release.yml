@@ -101,7 +101,6 @@ jobs:
         run: |
           npm install -g asar  # 安装 asar 工具
           npm install -g npm    # 升级 npm 到最新版本
-          npm install -g @softprops/action-gh-release # 安装发布 release 的 GitHub Actions 操作
           
       - name: Find and Replace in renderer.js
         run: |
