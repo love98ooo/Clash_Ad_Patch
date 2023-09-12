@@ -95,7 +95,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16' # 使用你需要的 Node.js 版本
+          node-version: '18' # 使用你需要的 Node.js 版本
 
       - name: Install nodejs dependencies
         run: |
@@ -175,4 +175,9 @@ jobs:
             - Replace Clash for Clash\resources\app.asar with the new app.asar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update previous_release.txt
+        run: |
+          sed -i 's/.*/'"$tag"'/g' previous_release.txt
+          echo "finished"
+          exit 1
           
