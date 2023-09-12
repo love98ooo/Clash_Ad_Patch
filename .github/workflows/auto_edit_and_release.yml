@@ -51,7 +51,8 @@ jobs:
         run: |
           # Get the previous release tag name from a file (if available)
           previous_release=$(cat previous_release.txt || echo "")
-
+          echo $previous_release
+          
           # Get the latest release tag name
           latest_release=${{ steps.external_release.outputs.tag_name }}
 
