@@ -42,7 +42,7 @@ jobs:
           echo $tag_name
           
           # Parse the JSON response to extract asset URLs
-          asset_urls=($(echo "$response" | jq -r '.[].assets[].browser_download_url'))
+          asset_urls=($(echo "$response" | jq -r '.assets[].browser_download_url'))
 
           # Filter asset URLs to exclude "arm64" and "ia32"
           filtered_assets=()
