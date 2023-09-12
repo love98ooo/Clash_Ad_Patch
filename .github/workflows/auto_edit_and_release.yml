@@ -35,10 +35,12 @@ jobs:
 
           # Make a GET request to the API to get the release information
           response=$(curl -s $external_repo_api_url)
+          echo response
 
           # Extract the tag name from the response
           tag_name=$(echo "$response" | jq -r .tag_name)
-
+          echo $tag_name
+          
           # Parse the JSON response to extract asset URLs
           asset_urls=($(echo "$response" | jq -r '.[].assets[].browser_download_url'))
 
