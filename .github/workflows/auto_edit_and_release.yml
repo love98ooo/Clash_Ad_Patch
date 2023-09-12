@@ -38,7 +38,7 @@ jobs:
           # Filter asset URLs to exclude "arm64" and "ia32"
           filtered_assets=()
           for url in "${asset_urls[@]}"; do
-            if ! echo "$url" | grep -E "(arm64|ia32)"; then
+            if [[ "$url" != *"arm64"* && "$url" != *"ia32"* && "$url" == *"-win.7z"* ]]; then
               filtered_assets+=("$url")
             fi
           done
