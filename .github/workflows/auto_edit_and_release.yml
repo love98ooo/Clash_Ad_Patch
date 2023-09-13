@@ -108,8 +108,8 @@ jobs:
         run: |
           # Find the app.asar file in the /resources directory
           ls
-          asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
-        
+          asar=$(find ./resources -type f -name 'app.asar' -print -quit)
+          echo "asar_path=$asar" >> "$GITHUB_ENV"
           if [ -n "$asar_path" ]; then
             echo "Found app.asar at: $asar_path"
             # Decompress app.asar using npm
@@ -148,7 +148,7 @@ jobs:
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
-
+          echo "asar: $asar_path"
           # Create a 7z archive with a specific name and include app.asar
           7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
           echo "Created 7z archive"
