@@ -172,7 +172,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ steps.extract_version.outputs.version }}
+          name: Clash for Windows v${{ steps.extract_version.outputs.version }} Ad Patch
           tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
           draft: false
           files: |
