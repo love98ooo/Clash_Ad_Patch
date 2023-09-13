@@ -8,7 +8,7 @@ on:
       branches:
         - master
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 17 * * *'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -110,7 +110,7 @@ jobs:
           ls
           asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
           ls "$asar_path"
-          asar_path.extracted="./resources/app"
+          asar_path.extracted="./resources"
           if [ -n "$asar_path" ]; then
             echo "Found app.asar at: $asar_path"
             # Decompress app.asar using npm
