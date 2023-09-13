@@ -170,9 +170,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            Clash.for.Windows-${{ version }}-win_app.7z  # 指定要上传的二进制附件文件
-          name: Clash for Windows v${{ version }} Ad Patch
-          tag_name: v${{ version }}
+            Clash.for.Windows-0.20.34-win_app.7z  # 指定要上传的二进制附件文件
+          name: Clash for Windows v0.20.34 Ad Patch
+          tag_name: 0.20.34
           body: |
             ⚠️ For learning purposes only. If there is any infringement, please send me a private message to delete
 
