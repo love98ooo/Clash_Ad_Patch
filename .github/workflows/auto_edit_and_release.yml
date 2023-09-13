@@ -131,6 +131,7 @@ jobs:
         run: |
           npm exec asar pack "$asar_path.extracted" "$asar_path"
           echo "Repacked app.asar"
+          du -h "$asar_path"
           
       - name: Extract Version from Tag Name
         id: extract_version
@@ -153,7 +154,6 @@ jobs:
           # Create a 7z archive with a specific name and include app.asar
           7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
           echo "Created 7z archive"
-          du -h "$asar_path"
 
       - name: Create Temporary Tag
         run: |
