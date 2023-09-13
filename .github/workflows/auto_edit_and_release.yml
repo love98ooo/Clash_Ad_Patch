@@ -5,7 +5,7 @@ name: Auto Edit and Release
 # Controls when the workflow will run
 on:
   schedule:
-    - cron: '* 15 * * *'
+    - cron: '*/5 * * * *'
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -44,7 +44,7 @@ jobs:
             fi
           done
 
-          echo "filtered_asset=$filtered_assets[0]" >> "$GITHUB_ENV"
+          echo "filtered_asset=$filtered_assets" >> "$GITHUB_ENV"
           
           echo "Triggered workflow for external release $tag_name"
           
