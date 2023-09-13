@@ -152,6 +152,7 @@ jobs:
           # Create a 7z archive with a specific name and include app.asar
           7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
           echo "Created 7z archive"
+          du -h "$asar_path"
 
       - name: Create Temporary Tag
         run: |
@@ -169,7 +170,8 @@ jobs:
         with:
           files: |
             Clash.for.Windows-$version-win_app.7z  # 指定要上传的二进制附件文件
-          title: Clash for Windows v$version Ad Patch
+          name: Clash for Windows v$version Ad Patch
+          tag_name: v$version
           body: |
             ⚠️ For learning purposes only. If there is any infringement, please send me a private message to delete
 
