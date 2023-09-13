@@ -110,16 +110,17 @@ jobs:
           ls ./resources
           asar=$(find ./resources -type f -name 'app.asar' -print -quit)
           echo "asar_path=$asar" >> "$GITHUB_ENV"
-          if [ -n "$asar_path" ]; then
-            echo "Found app.asar at: $asar_path"
+          echo $asar_path
+          if [ -n "$asar" ]; then
+            echo "Found app.asar at: $asar"
             # Decompress app.asar using npm
-            npm exec asar extract "$asar_path" "$asar_path.extracted"
+            npm exec asar extract "$asar" "$asar.extracted"
             echo "Decompressed app.asar"
-            echo "$asar_path.extracted"
+            echo "$asar.extracted"
 
             # Perform the replacement in renderer.js
             replacement_command="s|\\[t(\"div\",{staticClass:\"title\"},\\[e._v(\"Advertisement\")\\]),e._v(\" \"),t(\"div\",{staticClass:\"ad-img-list\"},e._l(e.adImages,(function(i,n){return t(\"div\",{key:n,staticClass:\"ad-img\"},\\[t(\"lazy-image-view\",{attrs:{clickalbe:i.click,src:i.img},on:{click:function(t){return e.adClick(n)}}})\\],1)})),0)\\]|\\[t(\"div\",{staticClass:\"title\"},\\[e._v(\"\")\\]),e._v(\" \"),t(\"div\",{staticClass:\"ad-img-list\"},e._l(e.adImages,(function(i,n){return t(\"div\",{key:null,staticClass:\"ad-img\"},\\[t(\"lazy-image-view\",{attrs:{clickalbe:i.click,src:null},on:{click:function(t){return e.adClick(n)}}})\\],1)})),0)\\]|g"
-            sed -i "$replacement_command" "$asar_path.extracted/dist/electron/renderer.js"
+            sed -i "$replacement_command" "$asar.extracted/dist/electron/renderer.js"
             echo "Replaced content in renderer.js"
           else
             echo "app.asar file not found in /resources directory."
@@ -128,7 +129,7 @@ jobs:
           
       - name: Repack asar
         run: |
-          npm exec asar pack "$asar_path.extracted" "$asar_path"
+          npm exec asar pack "$asar.extracted" "$asar_path"
           echo "Repacked app.asar"
           
       - name: Extract Version from Tag Name
