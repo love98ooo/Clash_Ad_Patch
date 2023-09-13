@@ -88,7 +88,7 @@ jobs:
           # Check if the downloaded file is a 7z archive
           if [[ "$filename" == *.7z ]]; then
             # Extract the 7z file
-            7z e "$filename" resourse/app.asar
+            7z e "$filename"
             echo "Extracted $filename"
           else
             echo "$filename is not a 7z archive. Skipping extraction."
