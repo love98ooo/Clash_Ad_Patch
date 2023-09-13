@@ -174,12 +174,11 @@ jobs:
         with:
           name: Release ${{ steps.extract_version.outputs.version }}
           tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
-          draft: true
+          draft: false
           files: |
             ${{ env.archive_path }}
       - name: Update previous_release.txt
         run: |
           sed -i 's/.*/'"$tag"'/g' previous_release.txt
           echo "finished"
-          exit 1
           
