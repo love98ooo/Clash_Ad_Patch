@@ -151,9 +151,7 @@ jobs:
           echo "asar: $asar_path"
           # Create a 7z archive with a specific name and include app.asar
           7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
-          echo Clash.for.Windows-$version-win_app.7z > ${{ github.workspace }}-release.7z
-          cp Clash.for.Windows-$version-win_app.7z ${{ github.workspace }}-release.7z
-          du -h ${{ github.workspace }}-release.7z
+          echo "archive_path=Clash.for.Windows-$version-win_app.7z" >> "$GITHUB_ENV"
           echo "Created 7z archive"
 
       - name: Create Temporary Tag
@@ -169,28 +167,14 @@ jobs:
           echo "Created temporary tag v$version"
           echo "::set-output name=tag::v$version"
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-#          tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
-#          release_name: Release ${{ steps.create_temporary_tag.outputs.tag }}
-          tag_name: v0.20.34
-          release_name: Release v0.20.34
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: sekwah41/upload-release-assets@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ${{ github.workspace }}-release.7z
-          asset_name: ${{ github.workspace }}-release.7z
-          asset_content_type: application/7z
+          name: Release ${{ steps.extract_version.outputs.version }}
+          tag: ${{ steps.create_temporary_tag.outputs.tag }}
+          draft: true
+          files: |
+            ${{ env.archive_path }}
       - name: Update previous_release.txt
         run: |
           sed -i 's/.*/'"$tag"'/g' previous_release.txt
