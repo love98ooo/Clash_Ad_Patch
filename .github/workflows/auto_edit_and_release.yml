@@ -157,6 +157,8 @@ jobs:
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
+          git config --global user.email "love98ooo@github.io"
+          git config --global user.name "Love98"
 
           # Create a temporary tag (only local)
           git tag -a "v$version" -m "Version $version"
