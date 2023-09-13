@@ -109,8 +109,8 @@ jobs:
           # Find the app.asar file in the /resources directory
           ls
           asar_path=$(find ./resources -type f -name 'app.asar' -print -quit)
-          
-
+          ls "$asar_path"
+          asar_path.extracted="./resources/app"
           if [ -n "$asar_path" ]; then
             echo "Found app.asar at: $asar_path"
             # Decompress app.asar using npm
