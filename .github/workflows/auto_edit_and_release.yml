@@ -144,13 +144,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Repack asar
+      - name: Archive asar to 7z
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
 
           # Create a 7z archive with a specific name and include app.asar
-          7z a "Clash.for.Windows-$version-win_app.7z" path/to/original/app.asar
+          7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
           echo "Created 7z archive"
 
       - name: Create Temporary Tag
