@@ -107,7 +107,7 @@ jobs:
       - name: Find and Replace in renderer.js
         run: |
           # Find the app.asar file in the /resources directory
-          ls
+          ls ./resourses
           asar=$(find ./resources -type f -name 'app.asar' -print -quit)
           echo "asar_path=$asar" >> "$GITHUB_ENV"
           if [ -n "$asar_path" ]; then
