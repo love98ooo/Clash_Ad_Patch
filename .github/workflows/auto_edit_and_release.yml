@@ -152,7 +152,9 @@ jobs:
           # Create a 7z archive with a specific name and include app.asar
           7z a "Clash.for.Windows-$version-win_app.7z" "$asar_path"
           echo Clash.for.Windows-$version-win_app.7z > ${{ github.workspace }}-release.7z
-          echo "Created 7z archive"
+     			echo ${{ github.workspace }}-release.7z
+					du -h ${{ github.workspace }}-release.7z
+					echo "Created 7z archive"
 
       - name: Create Temporary Tag
         run: |
