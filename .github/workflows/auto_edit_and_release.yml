@@ -175,8 +175,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
-          release_name: Release ${{ steps.create_temporary_tag.outputs.tag }}
+#          tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
+#          release_name: Release ${{ steps.create_temporary_tag.outputs.tag }}
+          tag_name: v0.20.34
+          release_name: Release v0.20.34
           draft: false
           prerelease: false
       - name: Upload Release Asset
