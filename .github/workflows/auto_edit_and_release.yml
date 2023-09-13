@@ -188,5 +188,8 @@ jobs:
       - name: Update previous_release.txt
         run: |
           sed -i 's/.*/'"${{ env.tag }}"'/g' previous_release.txt
+          git add .
+          git commit -m "update release.txt"
+          git push
           echo "finished"
           
