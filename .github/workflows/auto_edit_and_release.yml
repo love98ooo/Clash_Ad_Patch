@@ -74,13 +74,13 @@ jobs:
           fi
           
       - name: Install 7z tool
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           sudo apt-get update
           sudo apt-get install -y p7zip-full  # 安装7z命令行工具
         
       - name: Download and extract 7z file
-        if: ${{ env.is_new_release }}  == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           # Get the filtered asset URLs from the previous step
           url=$filtered_asset
@@ -98,19 +98,19 @@ jobs:
           fi
       
       - name: Set up Node.js
-        if: ${{ env.is_new_release }}  == "true"
+        if: ${{ env.is_new_release == "true" }}
         uses: actions/setup-node@v2
         with:
           node-version: '18' # 使用你需要的 Node.js 版本
 
       - name: Install nodejs dependencies
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           npm install -g asar  # 安装 asar 工具
           npm install -g npm    # 升级 npm 到最新版本
           
       - name: Find and Replace in renderer.js
-        if:  ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           # Find the app.asar file in the /resources directory
           ls ./resources
@@ -134,7 +134,7 @@ jobs:
           fi
           
       - name: Repack asar
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           npm exec asar pack "$asar_path.extracted" "$asar_path"
           echo "Repacked app.asar"
@@ -142,7 +142,7 @@ jobs:
           
       - name: Extract Version from Tag Name
         id: extract_version
-        if: ${{ env.is_new_release }}  == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           # Get the tag_name from the previous step
           tag_name=$tag
@@ -153,7 +153,7 @@ jobs:
           echo "::set-output name=version::$version"
 
       - name: Archive asar to 7z
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
@@ -165,7 +165,7 @@ jobs:
 
       - name: Create Temporary Tag
         id: create_temporary_tag
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           # Extract the version number from the previous step
           version=${{ steps.extract_version.outputs.version }}
@@ -179,7 +179,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         with:
           name: Clash for Windows v${{ steps.extract_version.outputs.version }} Ad Patch
           tag_name: ${{ steps.create_temporary_tag.outputs.tag }}
@@ -195,7 +195,7 @@ jobs:
             2. Unzip Clash.for.Windows-0.xx.xx-win.7z
             3. Replace Clash for Clash\resources\app.asar with the new app.asar
       - name: Update previous_release.txt
-        if: ${{ env.is_new_release }} == "true"
+        if: ${{ env.is_new_release == "true" }}
         run: |
           sed -i 's/.*/'"${{ env.tag }}"'/g' previous_release.txt
           git add ./previous_release.txt
