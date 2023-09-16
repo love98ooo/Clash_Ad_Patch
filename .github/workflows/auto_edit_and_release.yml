@@ -189,7 +189,7 @@ jobs:
           body: |
             ⚠️ For learning purposes only. If there is any infringement, please send me a private message to delete
 
-            How to use it:
+            # How to use it:
             1. Quit your Clash first
             2. Download Clash.for.Windows-0.xx.xx-win_app.7z
             3. Unzip Clash.for.Windows-0.xx.xx-win.7z
