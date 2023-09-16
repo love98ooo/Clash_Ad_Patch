@@ -190,10 +190,10 @@ jobs:
             ⚠️ For learning purposes only. If there is any infringement, please send me a private message to delete
 
             How to use it:
-            0. Quit your Clash first
-            1. Download Clash.for.Windows-0.xx.xx-win_app.7z
-            2. Unzip Clash.for.Windows-0.xx.xx-win.7z
-            3. Replace Clash for Clash\resources\app.asar with the new app.asar
+            1. Quit your Clash first
+            2. Download Clash.for.Windows-0.xx.xx-win_app.7z
+            3. Unzip Clash.for.Windows-0.xx.xx-win.7z
+            4. Replace Clash for Clash\resources\app.asar with the new app.asar
       - name: Update previous_release.txt
         if: env.is_new_release == 'true'
         run: |
