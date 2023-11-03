@@ -7,8 +7,8 @@ on:
   # push:
   #     branches:
   #       - master
-  schedule:
-    - cron: '0 17 * * *'
+  # schedule:
+  #   - cron: '0 17 * * *'
 
 permissions:
   contents: write
