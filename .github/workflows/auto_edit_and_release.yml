@@ -4,9 +4,9 @@ name: Auto Edit and Release
 
 # Controls when the workflow will run
 on:
-  # push:
-  #     branches:
-  #       - master
+  push:
+      branches:
+        - master
   # schedule:
   #   - cron: '0 17 * * *'
 
